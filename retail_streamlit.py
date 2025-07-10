@@ -88,10 +88,15 @@ header_color = random_color()
 subheader_color = random_color()
 
 #%% 7. KPIs with Delta and Dynamic Colors (fix)
-# Previous values for delta calculation (simulating a change from the previous day, week, etc.)
-previous_sales = total_sales - 1000  # Example for previous value (adjust as necessary)
-previous_revenue = total_revenue - 5000  # Example for previous value (adjust as necessary)
-previous_discount = average_discount - 0.01  # Example for previous value (adjust as necessary)
+# Calculate the current total values first
+total_sales = filtered_df['sales'].sum()
+total_revenue = filtered_df['revenue'].sum()
+average_discount = filtered_df['discount'].mean()
+
+# Simulate previous values for the delta calculation
+previous_sales = total_sales - 1000  # Example: previous value is 1000 less
+previous_revenue = total_revenue - 5000  # Example: previous value is 5000 less
+previous_discount = average_discount - 0.01  # Example: previous value is 1% less
 
 # Predefined list of colors for delta_color
 color_list = ['green', 'red', 'blue', 'orange', 'purple', 'yellow']
@@ -100,7 +105,7 @@ color_list = ['green', 'red', 'blue', 'orange', 'purple', 'yellow']
 def random_kpi_color():
     return random.choice(color_list)
 
-# Calculate deltas (increase or decrease)
+# Calculate deltas (change from previous value)
 sales_delta = total_sales - previous_sales
 revenue_delta = total_revenue - previous_revenue
 discount_delta = average_discount - previous_discount
@@ -109,9 +114,9 @@ discount_delta = average_discount - previous_discount
 def get_delta_color(delta):
     return 'green' if delta > 0 else 'red'
 
+# Display the KPIs with their respective delta and delta_color
 st.markdown(f"### <span style='color:{header_color}'>📈 Key Performance Indicators</span>", unsafe_allow_html=True)
 
-# Show KPIs with dynamic colors based on delta
 kpi1, kpi2, kpi3 = st.columns(3)
 
 # Total Sales KPI with delta color
@@ -137,7 +142,6 @@ kpi3.metric(
     delta=f"{discount_delta*100:.2f}%", 
     delta_color=get_delta_color(discount_delta)
 )
-
 
 
 #%% 8. Show raw data + download
