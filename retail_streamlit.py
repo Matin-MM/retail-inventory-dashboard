@@ -87,7 +87,7 @@ def random_color():
 header_color = random_color()
 subheader_color = random_color()
 
-#%% 7. KPIs with Delta and Dynamic Colors (fix)
+#%% 7. KPIs with Delta and Dynamic Colors (fixed for delta_color)
 # Calculate the current total values first
 total_sales = filtered_df['sales'].sum()
 total_revenue = filtered_df['revenue'].sum()
@@ -112,7 +112,11 @@ discount_delta = average_discount - previous_discount
 
 # Determine the delta color based on whether the value increased or decreased
 def get_delta_color(delta):
-    return 'green' if delta > 0 else 'red'
+    # Ensure only valid color strings are returned
+    if delta > 0:
+        return 'green'
+    else:
+        return 'red'
 
 # Display the KPIs with their respective delta and delta_color
 st.markdown(f"### <span style='color:{header_color}'>📈 Key Performance Indicators</span>", unsafe_allow_html=True)
@@ -124,7 +128,7 @@ kpi1.metric(
     "🛒 Total Sales", 
     f"{total_sales:,}", 
     delta=f"{sales_delta:,}", 
-    delta_color=get_delta_color(sales_delta)
+    delta_color=get_delta_color(sales_delta)  # Ensure delta_color is either 'green' or 'red'
 )
 
 # Total Revenue KPI with delta color
@@ -132,7 +136,7 @@ kpi2.metric(
     "💰 Total Revenue", 
     f"${total_revenue:,.2f}", 
     delta=f"${revenue_delta:,.2f}", 
-    delta_color=get_delta_color(revenue_delta)
+    delta_color=get_delta_color(revenue_delta)  # Ensure delta_color is either 'green' or 'red'
 )
 
 # Avg Discount KPI with delta color
@@ -140,8 +144,9 @@ kpi3.metric(
     "🏷️ Avg Discount", 
     f"{average_discount*100:.2f}%", 
     delta=f"{discount_delta*100:.2f}%", 
-    delta_color=get_delta_color(discount_delta)
+    delta_color=get_delta_color(discount_delta)  # Ensure delta_color is either 'green' or 'red'
 )
+
 
 
 #%% 8. Show raw data + download
