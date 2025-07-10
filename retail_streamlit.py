@@ -87,16 +87,24 @@ def random_color():
 header_color = random_color()
 subheader_color = random_color()
 
-#%% 7. KPIs with Dynamic Colors
+#%% 7. KPIs with Dynamic Colors (fixed for delta_color)
 total_sales = filtered_df['sales'].sum()
 total_revenue = filtered_df['revenue'].sum()
 average_discount = filtered_df['discount'].mean()
 
+# Predefined list of colors for delta_color
+color_list = ['green', 'red', 'blue', 'orange', 'purple', 'yellow']
+
+# Function to randomly pick a color from the list for delta_color
+def random_kpi_color():
+    return random.choice(color_list)
+
 st.markdown(f"### <span style='color:{header_color}'>📈 Key Performance Indicators</span>", unsafe_allow_html=True)
 kpi1, kpi2, kpi3 = st.columns(3)
-kpi1.metric("🛒 Total Sales", f"{total_sales:,}", delta_color=random_color())
-kpi2.metric("💰 Total Revenue", f"${total_revenue:,.2f}", delta_color=random_color())
-kpi3.metric("🏷️ Avg Discount", f"{average_discount*100:.2f}%", delta_color=random_color())
+kpi1.metric("🛒 Total Sales", f"{total_sales:,}", delta_color=random_kpi_color())
+kpi2.metric("💰 Total Revenue", f"${total_revenue:,.2f}", delta_color=random_kpi_color())
+kpi3.metric("🏷️ Avg Discount", f"{average_discount*100:.2f}%", delta_color=random_kpi_color())
+
 
 #%% 8. Show raw data + download
 if show_data:
