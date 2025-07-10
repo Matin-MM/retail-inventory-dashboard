@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 from datetime import datetime, timedelta
+import random
 
 #%% 1. Page config
 st.set_page_config(
@@ -12,11 +13,7 @@ st.set_page_config(
     page_icon="📦",
 )
 
-#%% 2. Theme toggle
-st.sidebar.markdown("## 🎨 Theme Settings")
-theme = st.sidebar.radio("Select Plotly Theme:", ["plotly", "plotly_dark"])
-
-#%% 3. Data generation
+#%% 2. Data generation
 @st.cache_data
 def generate_inventory_data(n=5000):
     start = datetime(2024, 1, 1)
@@ -52,7 +49,7 @@ def generate_inventory_data(n=5000):
 
 df_inventory = generate_inventory_data()
 
-#%% 4. Sidebar filters
+#%% 3. Sidebar filters
 st.sidebar.markdown("## 🛠️ Filter Options")
 regions = df_inventory['region'].unique()
 selected_regions = st.sidebar.multiselect("Select Region(s):", regions, default=regions)
@@ -66,34 +63,38 @@ date_range = st.sidebar.date_input("Select Date Range:", [min_date, max_date], m
 
 show_data = st.sidebar.checkbox("🔎 Show Raw Data")
 
-#%% 5. Apply filters
+#%% 4. Apply filters
 filtered_df = df_inventory[
-    (df_inventory['region'].isin(selected_regions)) &
-    (df_inventory['date'] >= pd.Timestamp(date_range[0])) &
+    (df_inventory['region'].isin(selected_regions)) & 
+    (df_inventory['date'] >= pd.Timestamp(date_range[0])) & 
     (df_inventory['date'] <= pd.Timestamp(date_range[1]))
 ]
 if selected_category != 'All':
     filtered_df = filtered_df[filtered_df['category'] == selected_category]
 
-#%% 6. App Header
+#%% 5. App Header with Dynamic Colors
 st.title("📦 Retail Inventory Dashboard")
-st.markdown("""
-Welcome to the interactive **Retail Inventory Dashboard**.  
-Explore sales, stock levels, and revenue trends with dynamic filters and interactive visualizations.
-""")
 
-#%% 7. KPIs
+# Function to generate random colors
+def random_color():
+    return f"#{random.randint(0, 0xFFFFFF):06x}"
+
+# Dynamic background color for header
+header_color = random_color()
+st.markdown(f"<div style='background-color:{header_color}; padding:10px; text-align:center; color:white;'>Welcome to the interactive **Retail Inventory Dashboard**</div>", unsafe_allow_html=True)
+
+#%% 6. KPIs
 total_sales = filtered_df['sales'].sum()
 total_revenue = filtered_df['revenue'].sum()
 average_discount = filtered_df['discount'].mean()
 
-st.markdown("### 📈 Key Performance Indicators")
+st.markdown(f"### 📈 Key Performance Indicators", unsafe_allow_html=True)
 kpi1, kpi2, kpi3 = st.columns(3)
 kpi1.metric("🛒 Total Sales", f"{total_sales:,}")
 kpi2.metric("💰 Total Revenue", f"${total_revenue:,.2f}")
 kpi3.metric("🏷️ Avg Discount", f"{average_discount*100:.2f}%")
 
-#%% 8. Show raw data + download
+#%% 7. Show raw data + download
 if show_data:
     st.markdown("---")
     st.subheader("📄 Raw Filtered Data")
@@ -109,7 +110,7 @@ if show_data:
 st.markdown("---")
 st.header("📊 Interactive Visualizations")
 
-#%% 9. Plot 1: Total Sales by Category
+#%% 8. Plot 1: Total Sales by Category
 st.subheader("🗂️ Total Sales by Category")
 category_sales = filtered_df.groupby('category')['sales'].sum().reset_index()
 fig1 = px.bar(
@@ -117,51 +118,47 @@ fig1 = px.bar(
     x='category',
     y='sales',
     color='category',
-    template=theme,
     title='Total Sales by Category',
     labels={'sales': 'Total Sales', 'category': 'Category'}
 )
 st.plotly_chart(fig1, use_container_width=True)
 
-#%% 10. Plot 2: Stock Distribution by Region
+#%% 9. Plot 2: Stock Distribution by Region
 st.subheader("🌍 Stock Distribution by Region")
 region_stock = filtered_df.groupby('region')['stock_level'].sum().reset_index()
 fig2 = px.pie(
     region_stock,
     names='region',
     values='stock_level',
-    template=theme,
     title='Stock Distribution by Region',
     hole=0.4
 )
 st.plotly_chart(fig2, use_container_width=True)
 
-#%% 11. Plot 3: Sales Distribution Histogram
+#%% 10. Plot 3: Sales Distribution Histogram
 st.subheader("📦 Sales Transaction Amount Distribution")
 fig3 = px.histogram(
     filtered_df,
     x='sales',
     nbins=50,
-    template=theme,
     title='Transaction Amount Distribution',
     labels={'sales': 'Units Sold'}
 )
 fig3.update_traces(marker_color='lightskyblue')
 st.plotly_chart(fig3, use_container_width=True)
 
-#%% 12. Plot 4: Revenue Sunburst
+#%% 11. Plot 4: Revenue Sunburst
 st.subheader("🌞 Revenue by Category and Region")
-sunburst_data = filtered_df.groupby(['category','region']).agg({'revenue':'sum'}).reset_index()
+sunburst_data = filtered_df.groupby(['category', 'region']).agg({'revenue': 'sum'}).reset_index()
 fig4 = px.sunburst(
     sunburst_data,
     path=['category', 'region'],
     values='revenue',
-    template=theme,
     title='Revenue by Category and Region'
 )
 st.plotly_chart(fig4, use_container_width=True)
 
-#%% 13. Plot 5: Monthly Revenue Trend
+#%% 12. Plot 5: Monthly Revenue Trend
 st.subheader("📈 Monthly Revenue Trend")
 monthly_revenue = filtered_df.groupby('month')['revenue'].sum().reset_index()
 fig5 = px.line(
@@ -169,13 +166,11 @@ fig5 = px.line(
     x='month',
     y='revenue',
     markers=True,
-    template=theme,
     title='Monthly Revenue Trend',
     labels={'month': 'Month', 'revenue': 'Total Revenue'}
 )
 fig5.update_traces(line_color='mediumseagreen')
 st.plotly_chart(fig5, use_container_width=True)
 
-#%% 14. Footer
-st.markdown("---")
-st.caption("Built with ❤️ using Streamlit and Plotly")
+#%% 13. Footer with Dynamic Color
+st.markdown(f"---\n<span style='color:{random_color()}'>Built with ❤️ using Streamlit and Plotly</span>", unsafe_allow_html=True)
